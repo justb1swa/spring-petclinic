@@ -1,6 +1,6 @@
 pipeline {
-    agent any
-    stages {
+  agent any
+  stages {
     stage('Compile') {
       steps {
         sh './mvnw clean compile'
@@ -32,13 +32,15 @@ pipeline {
     stage('QA') {
       parallel {
         stage('Deploy') {
+          agent any
           steps {
             sh './mvnw spring-boot:run </dev/null &>/dev/null &'
           }
         }
 
         stage(' Integration and Performance Tests') {
-           steps {
+          agent any
+          steps {
             sh './mvnw verify'
             junit '**/target/surefire-reports/'
           }
