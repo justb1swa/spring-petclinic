@@ -39,7 +39,12 @@ pipeline {
         }
 
         stage(' Integration and Performance Tests') {
-          agent any
+          agent {
+            node {
+              label 'test'
+            }
+
+          }
           steps {
             sh './mvnw verify'
             junit '**/target/surefire-reports/'
