@@ -2,12 +2,7 @@ pipeline {
   agent any
   stages {
     stage('Compile') {
-      agent {
-        node {
-          label 'test'
-        }
-
-      }
+      agent any
       steps {
         sh './mvnw clean compile'
       }
