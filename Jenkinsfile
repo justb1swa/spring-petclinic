@@ -1,7 +1,12 @@
 pipeline {
-  agent any
+  agent {
+    node {
+      label 'test'
+    }
+
+  }
   stages {
-    stage('Compile') {
+    stage('compile') {
       steps {
         sh './mvnw clean compile'
       }
@@ -10,16 +15,15 @@ pipeline {
     stage('Static Analysis') {
       steps {
         sh '''./mvnw sonar:sonar \\
-  -Dsonar.projectKey=PetClinic8 \\
-  -Dsonar.host.url=http://172.31.89.246:9000/ \\
+  -Dsonar.host.url=172.31.89.246:9000 \\
+  -Dsonar.projectKey=Petclinic8 \\
   -Dsonar.login=sqp_acebc55ef4a490cc8da17b8bbb8c749805a39352'''
       }
     }
 
     stage('Unit Test') {
       steps {
-        sh '''./mvnw "-Dtest=**/petclinic/*/*.java" test
-'''
+        sh './mvnw "-Dtest=**/petclinic/*/*.java" test'
       }
     }
 
@@ -29,25 +33,19 @@ pipeline {
       }
     }
 
-    stage('QA') {
+    stage('Deploy') {
       parallel {
         stage('Deploy') {
-          agent any
           steps {
             sh './mvnw spring-boot:run </dev/null &>/dev/null &'
           }
         }
 
-        stage(' Integration and Performance Tests') {
-          agent {
-            node {
-              label 'test'
-            }
-
-          }
+        stage('Integration and Performance') {
           steps {
             sh './mvnw verify'
-            junit '**/target/surefire-reports/'
+            junit '**/target/surefire-reports/*.xml'
+            perfReport '**/target/jmeter/results/*'
           }
         }
 
